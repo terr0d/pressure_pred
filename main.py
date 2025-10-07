@@ -368,9 +368,11 @@ def main(train_csv='train.csv', test_csv='test.csv', cache_root='./cache_specs',
         except:
             return False
     mask_valid = (train_df_full['num_chunks'] > 0) & train_df_full['data_hdf5_path'].map(valid_h5)
-    removed = (~mask_valid).sum()
-    print(f'Фильтруем пустые train-эксперименты: удаляем {removed} из {len(train_df_full)}')
     train_df = train_df_full[mask_valid].reset_index(drop=True)
+
+    # Генерируем спектрограммы
+    precompute_cache_for_df(train_df, split_name='train', cache_root=cache_root, overwrite=False)
+    precompute_cache_for_df(test_df,  split_name='test',  cache_root=cache_root, overwrite=False)
 
     # Размечаем фолды со стратификацией по SBP/DBP и числу чанков
     train_df = add_folds_with_chunks(train_df, n_folds=5, seed=SEED, sbp_bins=5, dbp_bins=5)
